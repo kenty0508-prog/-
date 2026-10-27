@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>ピルリマインダー</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    h1 { margin-bottom: 10px; color: #333; }
+    #date-display { font-size: 1.2rem; margin-bottom: 30px; color: #666; }
+    #status-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; }
+    /* 大きくて押しやすいボタン */
+    #action-btn {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      font-size: 2rem;
+      font-weight: bold;
+      color: white;
+      border: none;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    /* 未服用（赤）と 服用済み（緑）の色 */
+    .not-taken { background-color: #ff4d4d; }
+    .taken { background-color: #4cd964; }
+    /* 間違えた時の取り消しボタン */
+    #cancel-btn {
+      margin-top: 30px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: #007aff;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      display: none; /* 最初は隠しておく */
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ピルリマインダー</h1>
+  <div id="date-display"></div>
+  <div id="status-text">未服用です🔴</div>
+  
+  <button id="action-btn" class="not-taken">飲んだ！</button>
+  <button id="cancel-btn">間違えて押した（取り消し）</button>
+
+  <script>
+    // 今日の日付を取得して表示
+    const today = new Date();
+    const dateString = today.getFullYear() + '年' + (today.getMonth() + 1) + '月' + today.getDate() + '日';
+    document.getElementById('date-display').innerText = dateString;
+
+    const actionBtn = document.getElementById('action-btn');
+    const statusText = document.getElementById('status-text');
+    const cancelBtn = document.getElementById('cancel-btn');
+
+    // スマホの中に保存されている記録を読み込む
+    const savedDate = localStorage.getItem('lastTakenDate');
+
+    // 今日すでに飲んでいるかチェックして画面を更新する関数
+    function updateUI() {
+      if (savedDate === dateString) {
+        // 今日飲んでいる場合（緑）
+        statusText.innerText = "服用済みです🟢";
+        actionBtn.innerText = "完了";
+        actionBtn.className = "taken";
+        actionBtn.disabled = true; // ボタンを押せなくする
+        cancelBtn.style.display = "block"; // 取り消しボタンを表示
+      } else {
+        // まだ飲んでいない場合（赤）
+        statusText.innerText = "未服用です🔴";
+        actionBtn.innerText = "飲んだ！";
+        actionBtn.className = "not-taken";
+        actionBtn.disabled = false;
+        cancelBtn.style.display = "none";
+      }
+    }
+
+    // 「飲んだ！」ボタンを押した時の処理
+    actionBtn.addEventListener('click', () => {
+      localStorage.setItem('lastTakenDate', dateString); // 今日の日付を保存
+      updateUI(); // 画面を更新
+    });
+
+    // 「取り消し」ボタンを押した時の処理
+    cancelBtn.addEventListener('click', () => {
+      localStorage.removeItem('lastTakenDate'); // 記録を消す
+      updateUI(); // 画面を更新
+    });
+
+    // 最初に画面を開いた時にUIを更新
+    updateUI();
+  </script>
+</body>
+</html>
